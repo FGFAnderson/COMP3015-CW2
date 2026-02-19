@@ -25,7 +25,7 @@ SceneBasic_Uniform::SceneBasic_Uniform() : plane(10.0f, 10.0f, 100, 100) {
     pigMaterial.Ks = vec3(0.9f, 0.9f, 0.9f);
     pigMaterial.Shininess = 100.0f;
     glm::mat4 pigTransform = glm::translate(glm::mat4(1.0f), vec3(0.0f, 0.5f, 0.0f));
-    meshInstances.push_back(MeshInstance("./pig_triangulated.obj", pigMaterial, pigTransform, true));
+    meshInstances.push_back(MeshInstance("./media/pig_triangulated.obj", pigMaterial, pigTransform, true));
 
     Material pigMaterial2;
     pigMaterial2.Ka = vec3(0.2f, 0.2f, 0.2f);
@@ -33,7 +33,7 @@ SceneBasic_Uniform::SceneBasic_Uniform() : plane(10.0f, 10.0f, 100, 100) {
     pigMaterial2.Ks = vec3(0.9f, 0.9f, 0.9f);
     pigMaterial2.Shininess = 100.0f;
     glm::mat4 pigTransform2 = glm::translate(glm::mat4(1.0f), vec3(1.0f, 0.5f, 0.0f));
-    meshInstances.push_back(MeshInstance("./pig_triangulated.obj", pigMaterial2, pigTransform2, true));
+    meshInstances.push_back(MeshInstance("./media/pig_triangulated.obj", pigMaterial2, pigTransform2, true));
 }
 
 void SceneBasic_Uniform::initScene()
