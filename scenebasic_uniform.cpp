@@ -1,5 +1,4 @@
 #include "scenebasic_uniform.h"
-#include "objmesh.h"
 #include "trianglemesh.h"
 #include <cstdlib>
 
@@ -20,7 +19,21 @@ using glm::mat4;
 using glm::vec3;
 
 SceneBasic_Uniform::SceneBasic_Uniform() : plane(10.0f, 10.0f, 100, 100) {
-    mesh=ObjMesh::load("./pig_triangulated.obj", true);
+    Material pigMaterial;
+    pigMaterial.Ka = vec3(0.2f, 0.2f, 0.2f);
+    pigMaterial.Kd = vec3(1.0f, 0.5f, 0.5f);
+    pigMaterial.Ks = vec3(0.9f, 0.9f, 0.9f);
+    pigMaterial.Shininess = 100.0f;
+    glm::mat4 pigTransform = glm::translate(glm::mat4(1.0f), vec3(0.0f, 0.5f, 0.0f));
+    meshInstances.push_back(MeshInstance("./pig_triangulated.obj", pigMaterial, pigTransform, true));
+
+    Material pigMaterial2;
+    pigMaterial2.Ka = vec3(0.2f, 0.2f, 0.2f);
+    pigMaterial2.Kd = vec3(0.5f, 0.8f, 0.5f);
+    pigMaterial2.Ks = vec3(0.9f, 0.9f, 0.9f);
+    pigMaterial2.Shininess = 100.0f;
+    glm::mat4 pigTransform2 = glm::translate(glm::mat4(1.0f), vec3(1.0f, 0.5f, 0.0f));
+    meshInstances.push_back(MeshInstance("./pig_triangulated.obj", pigMaterial2, pigTransform2, true));
 }
 
 void SceneBasic_Uniform::initScene()
@@ -69,12 +82,13 @@ void SceneBasic_Uniform::render()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // AI USAGE: refer to ./ai_transcript/vector_looping
+    for (auto& meshInstance : meshInstances) {
+        meshInstance.render(prog, view, projection);
+    }
+
     setMatrices();
-
-    mesh->render();
-
     plane.render();
-    glBindVertexArray(0);
 }
 
 void SceneBasic_Uniform::resize(int w, int h)
@@ -96,5 +110,5 @@ void SceneBasic_Uniform::setMatrices()
     prog.setUniform("material.Ka", 0.2f, 0.2f, 0.2f);
     prog.setUniform("material.Kd", 1.0f, 0.5f, 0.5f);
     prog.setUniform("material.Ks", 0.9f, 0.9f, 0.9f);
-    prog.setUniform("material.Shininess", 100.0f);
+    prog.setUniform("material.Shininess", 10.0f);
 }

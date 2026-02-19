@@ -11,6 +11,7 @@ find_package(glm REQUIRED)
 add_executable(comp3015
     main.cpp
     scenebasic_uniform.cpp
+    core/mesh_instance.cpp
     helper/trianglemesh.cpp
     helper/objmesh.cpp
     helper/plane.cpp
@@ -22,6 +23,8 @@ add_executable(comp3015
 target_include_directories(comp3015 PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/helper
+    ${CMAKE_CURRENT_SOURCE_DIR}/structs
+    ${CMAKE_CURRENT_SOURCE_DIR}/core
     ${CMAKE_CURRENT_SOURCE_DIR}/glad/include
 )
 
