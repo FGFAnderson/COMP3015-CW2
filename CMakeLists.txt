@@ -11,8 +11,8 @@ find_package(glm REQUIRED)
 add_executable(comp3015
     main.cpp
     scenebasic_uniform.cpp
-    torus.cpp
-    trianglemesh.cpp
+    helper/torus.cpp
+    helper/trianglemesh.cpp
     helper/glslprogram.cpp
     helper/glutils.cpp
     helper/glad.c
