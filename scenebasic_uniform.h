@@ -2,16 +2,19 @@
 #define SCENEBASIC_UNIFORM_H
 
 #include "helper/scene.h"
-#include "torus.h"
+#include "helper/objmesh.h"
+#include "helper/plane.h"
 #include <glad/glad.h>
+#include <memory>
 #include "helper/glslprogram.h"
 
 class SceneBasic_Uniform : public Scene
 {
 private:
     GLSLProgram prog;
-    Torus torus;
-    glm::vec4 lightPosition;
+    glm::vec3 lightDirection;
+    std::unique_ptr<ObjMesh> mesh;
+    Plane plane;
 
     void setMatrices();
     void compile();

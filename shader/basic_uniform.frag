@@ -4,32 +4,42 @@ in vec3 Position;
 in vec3 Normal;
 layout(location = 0) out vec4 FragColor;
 
-uniform vec3 Kd;
-uniform vec3 Ks;
-uniform vec3 Ld;
-uniform vec4 LightPosition;
-uniform float Shininess;
+struct Light {
+    vec3 Direction;
+    vec3 La;
+    vec3 Ld;
+};
 
-vec3 phongModel(vec3 position, vec3 normal)
+struct Material {
+    vec3 Ka;
+    vec3 Kd;
+    vec3 Ks;
+    float Shininess;
+};
+
+uniform Light light;
+uniform Material material;
+
+vec3 blinnPhongModel(vec3 position, vec3 normal)
 {
     vec3 nnorm = normalize(normal);
-    vec3 s = normalize(vec3(LightPosition) - position);
+    vec3 s = normalize(light.Direction);
     vec3 v = normalize(-position);
-    vec3 r = reflect(-s, nnorm);
+    vec3 h = normalize(v + s);
 
     // Ambient component
-    vec3 ambient = 0.2 * Kd * Ld;
+    vec3 ambient = material.Ka * light.La;
 
     // Diffuse component
-    vec3 diffuse = Kd * Ld * max(0.0, dot(nnorm, s));
+    vec3 diffuse = material.Kd * light.Ld * max(0.0, dot(nnorm, s));
 
     // Specular component
-    vec3 specular = Ks * Ld * pow(max(0.0, dot(r, v)), Shininess);
+    vec3 specular = material.Ks * light.Ld * pow(max(0.0, dot(nnorm, h)), material.Shininess);
 
     return ambient + diffuse + specular;
 }
 
 void main()
 {
-    FragColor = vec4(phongModel(Position, Normal), 1.0);
+    FragColor = vec4(blinnPhongModel(Position, Normal), 1.0);
 }
