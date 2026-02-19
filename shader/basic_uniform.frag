@@ -2,6 +2,7 @@
 
 in vec3 Position;
 in vec3 Normal;
+in vec2 TexCoord;
 layout(location = 0) out vec4 FragColor;
 
 struct Light {
@@ -12,15 +13,15 @@ struct Light {
 
 struct Material {
     vec3 Ka;
-    vec3 Kd;
     vec3 Ks;
     float Shininess;
 };
 
 uniform Light light;
 uniform Material material;
+uniform sampler2D tex;
 
-vec3 blinnPhongModel(vec3 position, vec3 normal)
+vec3 blinnPhongModel(vec3 position, vec3 normal, vec3 texColor)
 {
     vec3 nnorm = normalize(normal);
     vec3 s = normalize(light.Direction);
@@ -31,7 +32,7 @@ vec3 blinnPhongModel(vec3 position, vec3 normal)
     vec3 ambient = material.Ka * light.La;
 
     // Diffuse component
-    vec3 diffuse = material.Kd * light.Ld * max(0.0, dot(nnorm, s));
+    vec3 diffuse = texColor * light.Ld * max(0.0, dot(nnorm, s));
 
     // Specular component
     vec3 specular = material.Ks * light.Ld * pow(max(0.0, dot(nnorm, h)), material.Shininess);
@@ -41,5 +42,7 @@ vec3 blinnPhongModel(vec3 position, vec3 normal)
 
 void main()
 {
-    FragColor = vec4(blinnPhongModel(Position, Normal), 1.0);
+    vec3 texColor = texture(tex, TexCoord).rgb;
+    vec3 lightColor = blinnPhongModel(Position, Normal, texColor);
+    FragColor = vec4(lightColor, 1.0);
 }

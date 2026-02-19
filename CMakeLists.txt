@@ -17,6 +17,8 @@ add_executable(comp3015
     helper/plane.cpp
     helper/glslprogram.cpp
     helper/glutils.cpp
+    helper/texture.cpp
+    helper/stb/stb_image.cpp
     helper/glad.c
 )
 

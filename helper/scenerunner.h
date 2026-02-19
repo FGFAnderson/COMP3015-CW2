@@ -34,7 +34,7 @@ public:
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-        if(debug) 
+        if(debug)
 			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
         if(samples > 0) {
             glfwWindowHint(GLFW_SAMPLES, samples);
@@ -119,7 +119,7 @@ private:
     void mainLoop(GLFWwindow * window, Scene & scene) {
         while( ! glfwWindowShouldClose(window) && !glfwGetKey(window, GLFW_KEY_ESCAPE) ) {
             GLUtils::checkForOpenGLError(__FILE__,__LINE__);
-			
+
             scene.update(float(glfwGetTime()));
             scene.render();
             glfwSwapBuffers(window);

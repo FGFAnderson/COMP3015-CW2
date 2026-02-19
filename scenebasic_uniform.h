@@ -2,7 +2,6 @@
 #define SCENEBASIC_UNIFORM_H
 
 #include "helper/scene.h"
-#include "helper/plane.h"
 #include <glad/glad.h>
 #include <vector>
 #include "helper/glslprogram.h"
@@ -14,7 +13,6 @@ private:
     GLSLProgram prog;
     glm::vec3 lightDirection;
     std::vector<MeshInstance> meshInstances;
-    Plane plane;
 
     void setMatrices();
     void compile();
