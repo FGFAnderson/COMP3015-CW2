@@ -2,17 +2,18 @@
 #define SCENEBASIC_UNIFORM_H
 
 #include "helper/scene.h"
-
+#include "torus.h"
 #include <glad/glad.h>
 #include "helper/glslprogram.h"
 
 class SceneBasic_Uniform : public Scene
 {
 private:
-    GLuint vaoHandle;
     GLSLProgram prog;
-    float angle;
+    Torus torus;
+    glm::vec4 lightPosition;
 
+    void setMatrices();
     void compile();
 
 public:
