@@ -1,0 +1,14 @@
+CompileFlags:
+  Add:
+    - "-stdlib=libc++"
+
+InlayHints:
+  Enabled: true
+  ParameterNames: true
+  DeducedTypes: true
+
+Hover:
+  ShowAKA: true
+
+Index:
+  Background: Build
