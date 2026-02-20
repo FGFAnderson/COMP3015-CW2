@@ -1,0 +1,2 @@
+source: https://polyhaven.com/a/overcast_soil_puresky
+image was then editted and canva and converted to a cubemap using: https://equirectangular-cubemap.vercel.app/
