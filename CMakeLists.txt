@@ -12,6 +12,8 @@ add_executable(comp3015
     main.cpp
     scenebasic_uniform.cpp
     core/mesh_instance.cpp
+    core/flycamera.cpp
+    helper/scenerunner.cpp
     helper/trianglemesh.cpp
     helper/objmesh.cpp
     helper/plane.cpp

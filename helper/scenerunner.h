@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include "scene.h"
 #include <GLFW/glfw3.h>
+#include "scene.h"
 #include "glutils.h"
 
 #define WIN_WIDTH 800
@@ -8,7 +9,6 @@
 
 #include <map>
 #include <string>
-#include <fstream>
 #include <iostream>
 
 class SceneRunner {
@@ -16,6 +16,8 @@ private:
     GLFWwindow * window;
     int fbw, fbh;
 	bool debug;           // Set true to enable debug messages
+    static Scene* currentScene;
+    static void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 
 public:
     SceneRunner(const std::string & windowTitle, int width = WIN_WIDTH, int height = WIN_HEIGHT, int samples = 0) : debug(true) {
@@ -52,6 +54,10 @@ public:
         // Get framebuffer size
         glfwGetFramebufferSize(window, &fbw, &fbh);
 
+        // Enable raw mouse input for fly camera
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetCursorPosCallback(window, mouseCallback);
+
         // Load the OpenGL functions.
         if(!gladLoadGL()) { exit(-1); }
 
@@ -73,6 +79,7 @@ public:
         scene.setDimensions(fbw, fbh);
         scene.initScene();
         scene.resize(fbw, fbh);
+        currentScene = &scene;
 
         // Enter the main loop
         mainLoop(window, scene);
@@ -117,17 +124,21 @@ private:
     }
 
     void mainLoop(GLFWwindow * window, Scene & scene) {
+        double lastTime = glfwGetTime();
+
         while( ! glfwWindowShouldClose(window) && !glfwGetKey(window, GLFW_KEY_ESCAPE) ) {
             GLUtils::checkForOpenGLError(__FILE__,__LINE__);
 
-            scene.update(float(glfwGetTime()));
+            double currentTime = glfwGetTime();
+            float deltaTime = static_cast<float>(currentTime - lastTime);
+            lastTime = currentTime;
+
+            scene.update(float(currentTime));
+            scene.processInput(window, deltaTime);
             scene.render();
             glfwSwapBuffers(window);
 
             glfwPollEvents();
-			int state = glfwGetKey(window, GLFW_KEY_SPACE);
-			if (state == GLFW_PRESS)
-				scene.animate(!scene.animating());
         }
     }
 };

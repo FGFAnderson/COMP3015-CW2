@@ -11,9 +11,8 @@ using std::string;
 using std::cerr;
 using std::endl;
 #include <glm/ext/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_inverse.hpp>
-
+#include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 
 using glm::mat4;
 using glm::vec3;
@@ -34,7 +33,7 @@ void SceneBasic_Uniform::initScene()
     glEnable(GL_DEPTH_TEST);
 
     model = mat4(1.0f);
-    view = glm::lookAt(vec3(0.0f, 10.0f, 20.0f), vec3(0.0f,0.0f,0.0f), vec3(0.0f,1.0f,0.0f));
+    view = camera.getViewMatrix();
     projection = glm::perspective(glm::radians(90.0f), (float)width / (float)height, 0.1f, 100.0f);
 
     glm::vec4 lightDir = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
@@ -43,15 +42,9 @@ void SceneBasic_Uniform::initScene()
     prog.setUniform("light.La", vec3(0.2f)); // Ambient
     prog.setUniform("light.Ld", vec3(0.5f)); // Diffuse
 
-    // AI USAGE: refer to ./ai_transcript/spotlight_direction_suggestion
-    glm::vec4 spotLightPos = glm::vec4(2.0f, 8.0f, 5.0f, 1.0f);
-    glm::vec3 spotPosition = glm::vec3(view * spotLightPos);
-    glm::vec3 spotDirection = glm::normalize(glm::vec3(view * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) - spotPosition);
-    prog.setUniform("spotlight.L", vec3(0.9f)); // Diffuse
-    prog.setUniform("spotlight.Direction", spotDirection);
+    prog.setUniform("spotlight.L", vec3(0.9f));
     prog.setUniform("spotlight.Exponent", 20.0f);
     prog.setUniform("spotlight.Cutoff", glm::radians(50.0f));
-    prog.setUniform("spotlight.Position", spotPosition);
 }
 
 void SceneBasic_Uniform::compile()
@@ -69,13 +62,15 @@ void SceneBasic_Uniform::compile()
 
 void SceneBasic_Uniform::update( float t )
 {
-	float angle = t * 0.5f;
-	float x = 3.0f * cos(angle);
-	float z = 3.0f * sin(angle);
+	view = camera.getViewMatrix();
 
-	glm::vec4 lightPos = glm::vec4(x, 2.0f, z, 0.0f);
-	lightDirection = glm::normalize(glm::vec3(view * lightPos));
-	prog.setUniform("light.Direction", lightDirection);
+	// Make spotlight follow camera and face direction user is looking
+	glm::vec3 camPos = camera.getPosition();
+	glm::vec3 spotPosition = glm::vec3(view * glm::vec4(camPos, 1.0f));
+	glm::vec3 camForward = camera.getForward();
+	glm::vec3 spotDirection = glm::normalize(glm::vec3(view * glm::vec4(camForward, 0.0f)));
+	prog.setUniform("spotlight.Position", spotPosition);
+	prog.setUniform("spotlight.Direction", spotDirection);
 }
 
 void SceneBasic_Uniform::render()
@@ -96,6 +91,10 @@ void SceneBasic_Uniform::resize(int w, int h)
     projection = glm::perspective(glm::radians(90.0f), (float)w/h, 0.1f, 100.0f);
 }
 
-void SceneBasic_Uniform::setMatrices()
-{
+void SceneBasic_Uniform::processInput(GLFWwindow* window, float deltaTime) {
+    camera.processInput(window, deltaTime);
+}
+
+void SceneBasic_Uniform::processMouseMovement(double xpos, double ypos) {
+    camera.processMouseMovement(xpos, ypos);
 }

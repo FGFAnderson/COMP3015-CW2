@@ -6,6 +6,7 @@
 #include <vector>
 #include "helper/glslprogram.h"
 #include "core/mesh_instance.h"
+#include "core/flycamera.h"
 
 class SceneBasic_Uniform : public Scene
 {
@@ -13,8 +14,7 @@ private:
     GLSLProgram prog;
     glm::vec3 lightDirection;
     std::vector<MeshInstance> meshInstances;
-
-    void setMatrices();
+    FlyCamera camera;
     void compile();
 
 public:
@@ -24,6 +24,8 @@ public:
     void update( float t );
     void render();
     void resize(int, int);
+    void processInput(GLFWwindow* window, float deltaTime);
+    void processMouseMovement(double xpos, double ypos);
 };
 
 #endif // SCENEBASIC_UNIFORM_H
