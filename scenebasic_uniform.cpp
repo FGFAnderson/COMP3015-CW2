@@ -2,6 +2,7 @@
 #include <cstdlib>
 
 #include <glm/fwd.hpp>
+#include <glm/geometric.hpp>
 #include <glm/trigonometric.hpp>
 #include <string>
 using std::string;
@@ -39,8 +40,18 @@ void SceneBasic_Uniform::initScene()
     glm::vec4 lightDir = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
     lightDirection = glm::normalize(glm::vec3(view * lightDir));
     prog.setUniform("light.Direction", lightDirection);
-    prog.setUniform("light.La", 0.2f, 0.2f, 0.2f); // Ambient
-    prog.setUniform("light.Ld", 1.0f, 1.0f, 1.0f); // Diffuse
+    prog.setUniform("light.La", vec3(0.2f)); // Ambient
+    prog.setUniform("light.Ld", vec3(0.5f)); // Diffuse
+
+    // AI USAGE: refer to ./ai_transcript/spotlight_direction_suggestion
+    glm::vec4 spotLightPos = glm::vec4(2.0f, 8.0f, 5.0f, 1.0f);
+    glm::vec3 spotPosition = glm::vec3(view * spotLightPos);
+    glm::vec3 spotDirection = glm::normalize(glm::vec3(view * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) - spotPosition);
+    prog.setUniform("spotlight.L", vec3(0.9f)); // Diffuse
+    prog.setUniform("spotlight.Direction", spotDirection);
+    prog.setUniform("spotlight.Exponent", 20.0f);
+    prog.setUniform("spotlight.Cutoff", glm::radians(50.0f));
+    prog.setUniform("spotlight.Position", spotPosition);
 }
 
 void SceneBasic_Uniform::compile()
