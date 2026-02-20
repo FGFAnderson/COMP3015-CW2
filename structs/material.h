@@ -4,9 +4,9 @@
 #include <glm/glm.hpp>
 
 struct Material {
-    glm::vec3 Ka;
-    glm::vec3 Ks;
-    float Shininess;
+    glm::vec3 ka;
+    glm::vec3 ks;
+    float shininess;
 };
 
 #endif // MATERIAL_H

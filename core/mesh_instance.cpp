@@ -13,14 +13,14 @@ void MeshInstance::render(GLSLProgram& prog, const glm::mat4& view,
                           const glm::mat4& projection) {
     glm::mat4 mv = view * transform;
 
-    prog.setUniform("ModelViewMatrix", mv);
-    prog.setUniform("NormalMatrix",
+    prog.setUniform("modelViewMatrix", mv);
+    prog.setUniform("normalMatrix",
                     glm::mat3(glm::transpose(glm::inverse(mv))));
-    prog.setUniform("MVP", projection * mv);
+    prog.setUniform("mvp", projection * mv);
 
-    prog.setUniform("material.Ka", material.Ka);
-    prog.setUniform("material.Ks", material.Ks);
-    prog.setUniform("material.Shininess", material.Shininess);
+    prog.setUniform("material.ka", material.ka);
+    prog.setUniform("material.ks", material.ks);
+    prog.setUniform("material.shininess", material.shininess);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
