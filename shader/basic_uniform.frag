@@ -27,13 +27,32 @@ struct Spotlight {
     float cutoff; // cutoff angle (between 0 and pi/2)
 };
 
-
+struct Fog {
+    float maxDist;
+    float minDist;
+    vec3 color;
+};
 
 uniform Light light;
 uniform Material material;
 uniform sampler2D tex;
 uniform Spotlight spotlight;
+uniform Fog fog;
 
+// Lecture 3: https://dle.plymouth.ac.uk/pluginfile.php/3763254/mod_resource/content/1/Lecture3%20-%20Lighting%20and%20shading.pdf
+vec3 fogModel(vec3 position, vec3 color) {
+    float distance = abs(position.z);
+
+    float fogFactor = (fog.maxDist - distance) / (fog.maxDist - fog.minDist);
+
+    fogFactor = clamp(fogFactor, 0.0, 1.0);
+
+    vec3 fogColor = mix(fog.color, color, fogFactor);
+
+    return fogColor;
+}
+
+// https://learnopengl.com/Lighting/Basic-Lighting
 vec3 blinnPhongModel(vec3 position, vec3 normal, vec3 texColor)
 {
     vec3 norm = normalize(normal);
@@ -53,6 +72,7 @@ vec3 blinnPhongModel(vec3 position, vec3 normal, vec3 texColor)
     return ambient + diffuse + specular;
 }
 
+// https://learnopengl.com/Lighting/Light-casters
 vec3 spotBlinnPhong(vec3 position, vec3 normal, vec3 texColor) {
     vec3 norm = normalize(normal);
 
@@ -84,5 +104,6 @@ void main()
     vec3 directLight = blinnPhongModel(position, normal, texColor);
     vec3 spotLight = spotBlinnPhong(position, normal, texColor);
     vec3 lightColor = directLight + spotLight;
-    fragColor = vec4(lightColor, 1.0);
+    vec3 fogColor = fogModel(position, lightColor);
+    fragColor = vec4(fogColor, 1.0);
 }

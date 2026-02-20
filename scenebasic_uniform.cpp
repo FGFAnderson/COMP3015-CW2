@@ -45,6 +45,10 @@ void SceneBasic_Uniform::initScene()
     prog.setUniform("spotlight.l", vec3(0.9f));
     prog.setUniform("spotlight.exponent", 20.0f);
     prog.setUniform("spotlight.cutoff", glm::radians(50.0f));
+
+    prog.setUniform("fog.maxDist", 60.0f);
+    prog.setUniform("fog.minDist", 10.0f);
+    prog.setUniform("fog.color", vec3(0.5f));
 }
 
 void SceneBasic_Uniform::compile()
