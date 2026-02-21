@@ -1,19 +1,11 @@
 #include "scenebasic_uniform.h"
 #include <cstdlib>
-
-#include <glm/fwd.hpp>
-#include <glm/geometric.hpp>
-#include <glm/trigonometric.hpp>
-#include <string>
-using std::string;
-
 #include <iostream>
-using std::cerr;
-using std::endl;
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <iostream>
 
+using std::cerr;
+using std::endl;
 using glm::mat4;
 using glm::vec3;
 
@@ -32,10 +24,10 @@ void SceneBasic_Uniform::initScene()
 
     glEnable(GL_DEPTH_TEST);
 
-    model = mat4(1.0f);
     view = camera.getViewMatrix();
-    projection = glm::perspective(glm::radians(90.0f), (float)width / (float)height, 0.1f, 100.0f);
+    projection = glm::perspective(glm::radians(90.0f), (float)width / (float)height, 0.1f, 1000.0f);
 
+    prog.use();
     glm::vec4 lightDir = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
     lightDirection = glm::normalize(glm::vec3(view * lightDir));
     prog.setUniform("light.direction", lightDirection);
@@ -46,18 +38,21 @@ void SceneBasic_Uniform::initScene()
     prog.setUniform("spotlight.exponent", 20.0f);
     prog.setUniform("spotlight.cutoff", glm::radians(50.0f));
 
-    prog.setUniform("fog.maxDist", 60.0f);
-    prog.setUniform("fog.minDist", 10.0f);
+    prog.setUniform("fog.maxDist", 50.0f);
+    prog.setUniform("fog.minDist", 5.0f);
     prog.setUniform("fog.color", vec3(0.5f));
 }
 
 void SceneBasic_Uniform::compile()
 {
 	try {
-		prog.compileShader("shader/basic_uniform.vert");
-		prog.compileShader("shader/basic_uniform.frag");
+		prog.compileShader("shader/lighting.vert");
+		prog.compileShader("shader/lighting.frag");
 		prog.link();
-		prog.use();
+
+		skyboxProg.compileShader("shader/skybox.vert");
+		skyboxProg.compileShader("shader/skybox.frag");
+		skyboxProg.link();
 	} catch (GLSLProgramException &e) {
 		cerr << e.what() << endl;
 		exit(EXIT_FAILURE);
@@ -73,6 +68,7 @@ void SceneBasic_Uniform::update( float t )
 	glm::vec3 spotposition = glm::vec3(view * glm::vec4(camPos, 1.0f));
 	glm::vec3 camForward = camera.getForward();
 	glm::vec3 spotDirection = glm::normalize(glm::vec3(view * glm::vec4(camForward, 0.0f)));
+	prog.use();
 	prog.setUniform("spotlight.position", spotposition);
 	prog.setUniform("spotlight.direction", spotDirection);
 }
@@ -81,10 +77,14 @@ void SceneBasic_Uniform::render()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    prog.use();
     // AI USAGE: refer to ./ai_transcript/vector_looping
     for (auto& meshInstance : meshInstances) {
         meshInstance.render(prog, view, projection);
     }
+
+    skyboxProg.use();
+    skybox.render(skyboxProg, view, projection);
 }
 
 void SceneBasic_Uniform::resize(int w, int h)
@@ -92,7 +92,7 @@ void SceneBasic_Uniform::resize(int w, int h)
     width = w;
     height = h;
     glViewport(0,0,w,h);
-    projection = glm::perspective(glm::radians(90.0f), (float)w/h, 0.1f, 100.0f);
+    projection = glm::perspective(glm::radians(90.0f), (float)w/h, 0.1f, 1000.0f);
 }
 
 void SceneBasic_Uniform::processInput(GLFWwindow* window, float deltaTime) {
