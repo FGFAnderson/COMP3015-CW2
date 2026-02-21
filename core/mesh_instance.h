@@ -13,11 +13,12 @@ class MeshInstance {
 private:
     std::unique_ptr<ObjMesh> mesh;
     GLuint texture;
+    GLuint normalMap;
     glm::mat4 transform;
     Material material;
 
 public:
-    MeshInstance(const char* obj_path, const char* texture_path,  const Material& mat, const glm::mat4& transform, bool center = true);
+    MeshInstance(const char* obj_path, const char* texture_path, const char* normal_map_path, const Material& mat, const glm::mat4& transform, bool center = true);
 
     void setTransform(const glm::mat4& t) { transform = t; }
     glm::mat4 getTransform() const { return transform; }

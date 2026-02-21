@@ -1,8 +1,10 @@
 #version 460
 
 in vec3 position;
-in vec3 normal;
 in vec2 texCoord;
+in vec3 normal;
+in vec3 tangent;
+in vec3 bitangent;
 layout(location = 0) out vec4 fragColor;
 
 struct Light {
@@ -38,6 +40,7 @@ uniform Material material;
 uniform sampler2D tex;
 uniform Spotlight spotlight;
 uniform Fog fog;
+uniform sampler2D normalMap;
 
 // Lecture 3: https://dle.plymouth.ac.uk/pluginfile.php/3763254/mod_resource/content/1/Lecture3%20-%20Lighting%20and%20shading.pdf
 vec3 fogModel(vec3 position, vec3 color) {
@@ -98,11 +101,22 @@ vec3 spotBlinnPhong(vec3 position, vec3 normal, vec3 texColor) {
     return spotScale * spotlight.l * (diffuse + specular);
 }
 
+// AI USAGE, AI was used to summarise and explain questions on normal mapping. Refer to : ./ai_transcript/normal_map_explanation.md
+vec3 sampleNormalMap(vec2 texCoord) {
+    // Convert normal map to -1,1 a range
+    vec3 sampledNormal = texture(normalMap, texCoord).rgb * 2.0 - 1.0;
+
+    mat3 TBN = mat3(normalize(tangent), normalize(bitangent), normalize(normal));
+
+    return normalize(TBN * sampledNormal);
+}
+
 void main()
 {
     vec3 texColor = texture(tex, texCoord).rgb;
-    vec3 directLight = blinnPhongModel(position, normal, texColor);
-    vec3 spotLight = spotBlinnPhong(position, normal, texColor);
+    vec3 normalDirection = sampleNormalMap(texCoord);
+    vec3 directLight = blinnPhongModel(position, normalDirection, texColor);
+    vec3 spotLight = spotBlinnPhong(position, normalDirection, texColor);
     vec3 lightColor = directLight + spotLight;
     vec3 fogColor = fogModel(position, lightColor);
     fragColor = vec4(fogColor, 1.0);

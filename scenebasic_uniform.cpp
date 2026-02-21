@@ -14,8 +14,14 @@ SceneBasic_Uniform::SceneBasic_Uniform() {
     rockMaterial.ka = vec3(0.15f, 0.5f, 0.5f);
     rockMaterial.ks = vec3(0.1f, 0.1f, 0.1f);
     rockMaterial.shininess = 2.0f;
-    glm::mat4 rockTransform = glm::scale(glm::mat4(1.0f), vec3(0.05f));
-    meshInstances.push_back(MeshInstance("./media/models/free_pack_rocks_stylized.obj", "./media/textures/Rocks_Stylized_Color.png", rockMaterial, rockTransform, true));
+    glm::mat4 rockTransform = glm::scale(glm::mat4(1.0f), vec3(1.0f));
+    meshInstances.push_back(MeshInstance(
+        "./media/models/rusty_toolbox.obj",
+        "./media/textures/toolbox_color.png",
+        "./media/textures/toolbox_normal.png",
+        rockMaterial,
+        rockTransform,
+        true));
 }
 
 void SceneBasic_Uniform::initScene()
@@ -38,8 +44,8 @@ void SceneBasic_Uniform::initScene()
     prog.setUniform("spotlight.exponent", 20.0f);
     prog.setUniform("spotlight.cutoff", glm::radians(50.0f));
 
-    prog.setUniform("fog.maxDist", 50.0f);
-    prog.setUniform("fog.minDist", 5.0f);
+    prog.setUniform("fog.maxDist", 80.0f);
+    prog.setUniform("fog.minDist", 25.0f);
     prog.setUniform("fog.color", vec3(0.5f));
 }
 
