@@ -10,18 +10,36 @@ using glm::mat4;
 using glm::vec3;
 
 SceneBasic_Uniform::SceneBasic_Uniform() {
-    Material rockMaterial;
-    rockMaterial.ka = vec3(0.15f, 0.5f, 0.5f);
-    rockMaterial.ks = vec3(0.1f, 0.1f, 0.1f);
-    rockMaterial.shininess = 2.0f;
-    glm::mat4 rockTransform = glm::scale(glm::mat4(1.0f), vec3(1.0f));
+    Material toolboxMaterial;
+    toolboxMaterial.ka = vec3(0.15f, 0.5f, 0.5f);
+    toolboxMaterial.ks = vec3(0.1f, 0.1f, 0.1f);
+    toolboxMaterial.shininess = 2.0f;
+    glm::mat4 toolboxTransform = glm::translate(glm::mat4(1.0f), vec3(0.0f, 0.0f, -5.0f)) * glm::scale(glm::mat4(1.0f), vec3(1.0f));
     meshInstances.push_back(MeshInstance(
         "./media/models/rusty_toolbox.obj",
-        "./media/textures/toolbox_color.png",
+        "./media/textures/toolbox_diffuse.png",
         "./media/textures/toolbox_normal.png",
-        rockMaterial,
-        rockTransform,
+        std::nullopt,
+        toolboxMaterial,
+        toolboxTransform,
         true));
+
+    Material lampMaterial;
+    lampMaterial.ka = vec3(0.15f, 0.5f, 0.5f);
+    lampMaterial.ks = vec3(0.1f, 0.1f, 0.1f);
+    lampMaterial.shininess = 2.0f;
+    glm::mat4 lampTransform = glm::scale(glm::mat4(1.0f), vec3(10.0f));
+    meshInstances.push_back(MeshInstance(
+        "./media/models/lantern.obj",
+        "./media/textures/lantern_diffuse.png",
+        "./media/textures/lantern_normal.png",
+        "./media/textures/lantern_alpha.png",
+        lampMaterial,
+        lampTransform,
+        true));
+
+
+
 }
 
 void SceneBasic_Uniform::initScene()
@@ -29,6 +47,8 @@ void SceneBasic_Uniform::initScene()
     compile();
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     view = camera.getViewMatrix();
     projection = glm::perspective(glm::radians(90.0f), (float)width / (float)height, 0.1f, 1000.0f);

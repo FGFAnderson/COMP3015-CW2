@@ -38,6 +38,8 @@ struct Fog {
 uniform Light light;
 uniform Material material;
 uniform sampler2D tex;
+uniform sampler2D alphaTex;
+uniform bool hasAlphaMap;
 uniform Spotlight spotlight;
 uniform Fog fog;
 uniform sampler2D normalMap;
@@ -114,10 +116,16 @@ vec3 sampleNormalMap(vec2 texCoord) {
 void main()
 {
     vec3 texColor = texture(tex, texCoord).rgb;
+    float alpha = hasAlphaMap ? texture(alphaTex, texCoord).r : 1.0;
     vec3 normalDirection = sampleNormalMap(texCoord);
+
+    // Handle back-facing surfaces
+    if(!gl_FrontFacing)
+        normalDirection = -normalDirection;
+
     vec3 directLight = blinnPhongModel(position, normalDirection, texColor);
-    vec3 spotLight = spotBlinnPhong(position, normalDirection, texColor);
+    vec3 spotLight = spotBlinnPhong(position, normalDirection, texCoord);
     vec3 lightColor = directLight + spotLight;
     vec3 fogColor = fogModel(position, lightColor);
-    fragColor = vec4(fogColor, 1.0);
+    fragColor = vec4(fogColor, alpha);
 }
