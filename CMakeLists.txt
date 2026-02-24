@@ -23,7 +23,7 @@ add_executable(comp3015
     helper/glutils.cpp
     helper/texture.cpp
     helper/stb/stb_image.cpp
-    helper/glad.c
+    glad/src/glad.c
 )
 
 target_include_directories(comp3015 PRIVATE

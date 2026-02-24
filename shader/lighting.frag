@@ -124,7 +124,7 @@ void main()
         normalDirection = -normalDirection;
 
     vec3 directLight = blinnPhongModel(position, normalDirection, texColor);
-    vec3 spotLight = spotBlinnPhong(position, normalDirection, texCoord);
+    vec3 spotLight = spotBlinnPhong(position, normalDirection, texColor);
     vec3 lightColor = directLight + spotLight;
     vec3 fogColor = fogModel(position, lightColor);
     fragColor = vec4(fogColor, alpha);
