@@ -1,6 +1,5 @@
 #include "texture.h"
 #include "stb/stb_image.h"
-#include "glutils.h"
 
 /*static*/
 GLuint Texture::loadTexture( const std::string & fName ) {

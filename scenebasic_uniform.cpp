@@ -1,5 +1,8 @@
 #include "scenebasic_uniform.h"
+#include <cmath>
 #include <cstdlib>
+#include <glad/glad.h>
+#include <glm/fwd.hpp>
 #include <iostream>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -37,14 +40,73 @@ SceneBasic_Uniform::SceneBasic_Uniform() {
         lampMaterial,
         lampTransform,
         true));
+}
 
+void SceneBasic_Uniform::setupFBO() {
+    glGenFramebuffers(1, &hdrFBO);
 
+    // Create HDR color texture
+    glGenTextures(1, &hdrColorTexture);
+    glBindTexture(GL_TEXTURE_2D, hdrColorTexture);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB32F, width, height);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    // Create depth renderbuffer
+    glGenRenderbuffers(1, &hdrDepthRBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, hdrDepthRBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32F, width, height);
+
+    // Attach to framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, hdrColorTexture, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, hdrDepthRBO);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cerr << "HDR Framebuffer not complete!" << std::endl;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void SceneBasic_Uniform::setupQuad() {
+    float quadVertices[] = {
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+    };
+
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+
+    // Position attribute
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+    // TexCoord attribute
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void SceneBasic_Uniform::renderQuad() {
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
 }
 
 void SceneBasic_Uniform::initScene()
 {
     compile();
+    setupFBO();
+    setupQuad();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -57,10 +119,10 @@ void SceneBasic_Uniform::initScene()
     glm::vec4 lightDir = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
     lightDirection = glm::normalize(glm::vec3(view * lightDir));
     prog.setUniform("light.direction", lightDirection);
-    prog.setUniform("light.la", vec3(0.2f)); // Ambient
+    prog.setUniform("light.la", vec3(0.1f)); // Ambient
     prog.setUniform("light.ld", vec3(0.5f)); // Diffuse
 
-    prog.setUniform("spotlight.l", vec3(0.9f));
+    prog.setUniform("spotlight.l", vec3(20.0f)); // Spotlight intensity
     prog.setUniform("spotlight.exponent", 20.0f);
     prog.setUniform("spotlight.cutoff", glm::radians(50.0f));
 
@@ -79,6 +141,10 @@ void SceneBasic_Uniform::compile()
 		skyboxProg.compileShader("shader/skybox.vert");
 		skyboxProg.compileShader("shader/skybox.frag");
 		skyboxProg.link();
+
+		toneMapProg.compileShader("shader/tonemapping.vert");
+		toneMapProg.compileShader("shader/tonemapping.frag");
+		toneMapProg.link();
 	} catch (GLSLProgramException &e) {
 		cerr << e.what() << endl;
 		exit(EXIT_FAILURE);
@@ -99,8 +165,9 @@ void SceneBasic_Uniform::update( float t )
 	prog.setUniform("spotlight.direction", spotDirection);
 }
 
-void SceneBasic_Uniform::render()
+void SceneBasic_Uniform::pass1()
 {
+    glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     prog.use();
@@ -111,6 +178,50 @@ void SceneBasic_Uniform::render()
 
     skyboxProg.use();
     skybox.render(skyboxProg, view, projection);
+}
+
+void SceneBasic_Uniform::computeLogAverageLuminance()
+{
+    int size = width * height;
+    glBindTexture(GL_TEXTURE_2D, hdrColorTexture);
+    std::vector<GLfloat> texData(size * 3);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, texData.data());
+
+    float sum = 0.0f;
+    for (int i = 0; i < size; i ++) {
+        float luminance = glm::dot(
+            vec3(texData[i * 3 + 0], texData[i * 3 + 1], texData[i * 3 + 2]),
+            vec3(0.2126f, 0.7152f, 0.0722f)
+        );
+
+        sum += logf(luminance + 0.0001f);
+    }
+
+    logAverageLuminance = exp(sum / (width * height));
+}
+
+void SceneBasic_Uniform::pass2()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+
+    toneMapProg.use();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, hdrColorTexture);
+    toneMapProg.setUniform("hdrBuffer", 0);
+    toneMapProg.setUniform("logAverageLum", logAverageLuminance);
+
+    renderQuad();
+
+    glEnable(GL_DEPTH_TEST);
+}
+
+void SceneBasic_Uniform::render()
+{
+    pass1();
+    computeLogAverageLuminance();
+    pass2();
 }
 
 void SceneBasic_Uniform::resize(int w, int h)

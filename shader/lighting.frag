@@ -120,7 +120,7 @@ void main()
     vec3 normalDirection = sampleNormalMap(texCoord);
 
     // Handle back-facing surfaces
-    if(!gl_FrontFacing)
+    if (!gl_FrontFacing)
         normalDirection = -normalDirection;
 
     vec3 directLight = blinnPhongModel(position, normalDirection, texColor);

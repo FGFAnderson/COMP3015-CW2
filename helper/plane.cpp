@@ -1,10 +1,5 @@
 #include "plane.h"
-#include "glutils.h"
 #include <glad/glad.h>
-#include "glutils.h"
-
-#include <cstdio>
-#include <cmath>
 
 Plane::Plane(float xsize, float zsize, int xdivs, int zdivs, float smax, float tmax)
 {

@@ -12,13 +12,31 @@
 class SceneBasic_Uniform : public Scene
 {
 private:
+    // Scene
     GLSLProgram prog;
     GLSLProgram skyboxProg;
     glm::vec3 lightDirection;
     std::vector<MeshInstance> meshInstances;
     SkyboxInstance skybox;
     FlyCamera camera;
+
+
+    // HDR
+    GLSLProgram toneMapProg;
+    GLuint hdrFBO;
+    GLuint hdrColorTexture;
+    GLuint hdrDepthRBO;
+    float logAverageLuminance;
+    GLuint quadVAO;
+    GLuint quadVBO;
+
     void compile();
+    void setupFBO();
+    void setupQuad();
+    void renderQuad();
+    void computeLogAverageLuminance();
+    void pass1();
+    void pass2();
 
 public:
     SceneBasic_Uniform();
