@@ -2,15 +2,15 @@
 #include "helper/texture.h"
 #include "trianglemesh.h"
 
-MeshInstance::MeshInstance(const char* obj_filename, const char* diffuse_texture_path, const char* normal_map_path, const std::optional<const char*>& alpha_map_path, const Material& mat, const glm::mat4& transform, bool center)
-    : mesh(ObjMesh::load(obj_filename, center, true)),
-      diffuseTexture(Texture::loadTexture(diffuse_texture_path)),
-      normalMap(Texture::loadTexture(normal_map_path)),
+MeshInstance::MeshInstance(const char* objPath, const char* diffuseTexturePath, const char* normalMapPath, const std::optional<const char*>& alphaMapPath, const Material& mat, const glm::mat4& transform, bool center)
+    : mesh(ObjMesh::load(objPath, center, true)),
+      diffuseTexture(Texture::loadTexture(diffuseTexturePath)),
+      normalMap(Texture::loadTexture(normalMapPath)),
       transform(transform),
       material(mat)
 {
-    if(alpha_map_path) {
-        alphaMap = Texture::loadTexture(*alpha_map_path);
+    if(alphaMapPath) {
+        alphaMap = Texture::loadTexture(*alphaMapPath);
     }
 }
 

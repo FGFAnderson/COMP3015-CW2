@@ -21,10 +21,10 @@ private:
 
 public:
     MeshInstance(
-        const char* obj_path,
-        const char* diffuse_texture_path,
-        const char* normal_map_path,
-        const std::optional<const char*>& alpha_map_path,
+        const char* objPath,
+        const char* diffuseTexturePath,
+        const char* normalMapPath,
+        const std::optional<const char*>& alphaMapPath,
         const Material& mat,
         const glm::mat4& transform,
         bool center = true

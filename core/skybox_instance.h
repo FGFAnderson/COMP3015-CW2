@@ -14,7 +14,7 @@ private:
 public:
     SkyboxInstance();
 
-    void render(GLSLProgram& prog, const glm::mat4& view, const glm::mat4& projection);
+    void render(GLSLProgram& prog, const glm::mat4& viewMatrix, const glm::mat4& projection);
 };
 
 #endif // SKYBOX_INSTANCE_H

@@ -8,11 +8,11 @@ SkyboxInstance::SkyboxInstance() : skybox(new SkyBox(500.0f)), cubemapTexture(0)
     cubemapTexture = Texture::loadCubeMap("./media/textures/skybox/skybox", ".png");
 }
 
-void SkyboxInstance::render(GLSLProgram& prog, const glm::mat4& view_in, const glm::mat4& projection)
+void SkyboxInstance::render(GLSLProgram& prog, const glm::mat4& viewMatrix, const glm::mat4& projection)
 {
     glDepthFunc(GL_LEQUAL);
 
-    glm::mat4 view = glm::mat4(glm::mat3(view_in));
+    glm::mat4 view = glm::mat4(glm::mat3(viewMatrix));
 
     prog.setUniform("projection", projection);
     prog.setUniform("view", view);
