@@ -30,13 +30,23 @@ private:
     GLuint quadVAO;
     GLuint quadVBO;
 
+    // Blur
+    GLSLProgram blurVerticalProg;
+    GLSLProgram blurHorizontalProg;
+    GLuint blurFBO;
+    GLuint blurTexture1;
+    GLuint blurTexture2;
+
     void compile();
     void setupFBO();
     void setupQuad();
     void renderQuad();
     void computeLogAverageLuminance();
-    void pass1();
-    void pass2();
+    void renderScene();
+    void blurVertical();
+    void blurHorizontal();
+    void tonemap();
+    float gauss(float x, float sigma2);
 
 public:
     SceneBasic_Uniform();

@@ -1,6 +1,5 @@
 #version 460
 
-in vec2 TexCoords;
 out vec4 FragColor;
 
 uniform sampler2D hdrBuffer;
@@ -16,7 +15,7 @@ uniform mat3 xyz2rgb = mat3(
         -1.5371385, 1.8760108, -0.2040259,
         -0.4985314, 0.0415560, 1.0572252);
 
-uniform float exposure = 0.35;
+uniform float exposure = 0.2;
 uniform float white = 0.928;
 
 void main()

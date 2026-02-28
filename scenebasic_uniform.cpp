@@ -67,6 +67,32 @@ void SceneBasic_Uniform::setupFBO() {
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Create blur FBO and textures
+    glGenFramebuffers(1, &blurFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, blurFBO);
+
+    // Create blur texture 1
+    glGenTextures(1, &blurTexture1);
+    glBindTexture(GL_TEXTURE_2D, blurTexture1);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB32F, width, height);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // Create blur texture 2
+    glGenTextures(1, &blurTexture2);
+    glBindTexture(GL_TEXTURE_2D, blurTexture2);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB32F, width, height);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, blurTexture1, 0);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cerr << "Blur Framebuffer not complete!" << std::endl;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void SceneBasic_Uniform::setupQuad() {
@@ -119,16 +145,40 @@ void SceneBasic_Uniform::initScene()
     glm::vec4 lightDir = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
     lightDirection = glm::normalize(glm::vec3(view * lightDir));
     prog.setUniform("light.direction", lightDirection);
-    prog.setUniform("light.la", vec3(0.1f)); // Ambient
-    prog.setUniform("light.ld", vec3(0.5f)); // Diffuse
+    prog.setUniform("light.la", vec3(0.05f)); // Ambient
+    prog.setUniform("light.ld", vec3(0.1f)); // Diffuse
 
-    prog.setUniform("spotlight.l", vec3(20.0f)); // Spotlight intensity
+    prog.setUniform("spotlight.l", vec3(4.0f)); // Spotlight intensity
     prog.setUniform("spotlight.exponent", 20.0f);
     prog.setUniform("spotlight.cutoff", glm::radians(50.0f));
 
     prog.setUniform("fog.maxDist", 80.0f);
     prog.setUniform("fog.minDist", 25.0f);
     prog.setUniform("fog.color", vec3(0.5f));
+
+    // Setup Gaussian blur weights
+    float weights[5], sum, sigma2 = 8.0f;
+    weights[0] = gauss(0, sigma2);
+    sum = weights[0];
+    for(int i = 1; i < 5; i++) {
+        weights[i] = gauss(float(i), sigma2);
+        sum += 2 * weights[i];
+    }
+
+    // Set uniforms for both blur programs
+    blurVerticalProg.use();
+    for(int i = 0; i < 5; i++) {
+        std::string uniName = "weight[" + std::to_string(i) + "]";
+        float val = weights[i] / sum;
+        blurVerticalProg.setUniform(uniName.c_str(), val);
+    }
+
+    blurHorizontalProg.use();
+    for(int i = 0; i < 5; i++) {
+        std::string uniName = "weight[" + std::to_string(i) + "]";
+        float val = weights[i] / sum;
+        blurHorizontalProg.setUniform(uniName.c_str(), val);
+    }
 }
 
 void SceneBasic_Uniform::compile()
@@ -145,6 +195,14 @@ void SceneBasic_Uniform::compile()
 		toneMapProg.compileShader("shader/tonemapping.vert");
 		toneMapProg.compileShader("shader/tonemapping.frag");
 		toneMapProg.link();
+
+		blurVerticalProg.compileShader("shader/blur.vert");
+		blurVerticalProg.compileShader("shader/blur_vertical.frag");
+		blurVerticalProg.link();
+
+		blurHorizontalProg.compileShader("shader/blur.vert");
+		blurHorizontalProg.compileShader("shader/blur_horizontal.frag");
+		blurHorizontalProg.link();
 	} catch (GLSLProgramException &e) {
 		cerr << e.what() << endl;
 		exit(EXIT_FAILURE);
@@ -165,7 +223,7 @@ void SceneBasic_Uniform::update( float t )
 	prog.setUniform("spotlight.direction", spotDirection);
 }
 
-void SceneBasic_Uniform::pass1()
+void SceneBasic_Uniform::renderScene()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -200,7 +258,36 @@ void SceneBasic_Uniform::computeLogAverageLuminance()
     logAverageLuminance = exp(sum / (width * height));
 }
 
-void SceneBasic_Uniform::pass2()
+void SceneBasic_Uniform::blurVertical()
+{
+    blurVerticalProg.use();
+    glBindFramebuffer(GL_FRAMEBUFFER, blurFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, blurTexture1, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, hdrColorTexture);
+    blurVerticalProg.setUniform("texture0", 0);
+
+    renderQuad();
+}
+
+void SceneBasic_Uniform::blurHorizontal()
+{
+    blurHorizontalProg.use();
+    glBindFramebuffer(GL_FRAMEBUFFER, blurFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, blurTexture2, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, blurTexture1);
+    blurHorizontalProg.setUniform("texture0", 0);
+
+    renderQuad();
+}
+
+void SceneBasic_Uniform::tonemap()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -208,7 +295,7 @@ void SceneBasic_Uniform::pass2()
 
     toneMapProg.use();
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, hdrColorTexture);
+    glBindTexture(GL_TEXTURE_2D, blurTexture2);
     toneMapProg.setUniform("hdrBuffer", 0);
     toneMapProg.setUniform("logAverageLum", logAverageLuminance);
 
@@ -217,11 +304,20 @@ void SceneBasic_Uniform::pass2()
     glEnable(GL_DEPTH_TEST);
 }
 
+float SceneBasic_Uniform::gauss(float x, float sigma2)
+{
+    double coeff = 1.0 / (glm::two_pi<double>() * sigma2);
+    double expon = -(x * x) / (2.0 * sigma2);
+    return (float)(coeff * exp(expon));
+}
+
 void SceneBasic_Uniform::render()
 {
-    pass1();
+    renderScene();
     computeLogAverageLuminance();
-    pass2();
+    blurVertical();
+    blurHorizontal();
+    tonemap();
 }
 
 void SceneBasic_Uniform::resize(int w, int h)
