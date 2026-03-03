@@ -18,7 +18,7 @@ private:
     float yaw, pitch;
 
 public:
-    FlyCamera(glm::vec3 startPos = glm::vec3(0.0f, 10.0f, 20.0f),
+    FlyCamera(glm::vec3 startPos = glm::vec3(0.0f, 3.0f, 12.0f),
               float moveSpeed = 15.0f,
               float mouseSensitivity = 0.015f);
 

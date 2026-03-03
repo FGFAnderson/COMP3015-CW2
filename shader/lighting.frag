@@ -43,6 +43,8 @@ uniform bool hasAlphaMap;
 uniform Spotlight spotlight;
 uniform Fog fog;
 uniform sampler2D normalMap;
+uniform bool hasNormalMap;
+uniform bool alphaTest;
 
 // Lecture 3: https://dle.plymouth.ac.uk/pluginfile.php/3763254/mod_resource/content/1/Lecture3%20-%20Lighting%20and%20shading.pdf
 vec3 fogModel(vec3 position, vec3 color) {
@@ -105,6 +107,9 @@ vec3 spotBlinnPhong(vec3 position, vec3 normal, vec3 texColor) {
 
 // AI USAGE, AI was used to summarise and explain questions on normal mapping. Refer to : ./ai_transcript/normal_map_explanation.md
 vec3 sampleNormalMap(vec2 texCoord) {
+    if (!hasNormalMap)
+        return normalize(normal);
+
     // Convert normal map to -1,1 a range
     vec3 sampledNormal = texture(normalMap, texCoord).rgb * 2.0 - 1.0;
 
@@ -115,8 +120,14 @@ vec3 sampleNormalMap(vec2 texCoord) {
 
 void main()
 {
-    vec3 texColor = texture(tex, texCoord).rgb;
-    float alpha = hasAlphaMap ? texture(alphaTex, texCoord).r : 1.0;
+    vec4 texSample = texture(tex, texCoord);
+    vec3 texColor = texSample.rgb;
+
+    float alpha = hasAlphaMap ? texture(alphaTex, texCoord).r : texSample.a;
+
+    if (alphaTest && alpha < 0.1)
+        discard;
+
     vec3 normalDirection = sampleNormalMap(texCoord);
 
     // Handle back-facing surfaces

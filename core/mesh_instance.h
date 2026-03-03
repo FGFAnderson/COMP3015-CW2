@@ -14,7 +14,7 @@ class MeshInstance {
 private:
     std::unique_ptr<ObjMesh> mesh;
     GLuint diffuseTexture;
-    GLuint normalMap;
+    std::optional<GLuint> normalMap;
     std::optional<GLuint> alphaMap;
     glm::mat4 transform;
     Material material;
@@ -23,7 +23,7 @@ public:
     MeshInstance(
         const char* objPath,
         const char* diffuseTexturePath,
-        const char* normalMapPath,
+        const std::optional<const char*>& normalMapPath,
         const std::optional<const char*>& alphaMapPath,
         const Material& mat,
         const glm::mat4& transform,

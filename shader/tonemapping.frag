@@ -1,5 +1,6 @@
 #version 460
 
+in vec2 texCoords;
 out vec4 FragColor;
 
 uniform sampler2D hdrBuffer;
@@ -20,7 +21,7 @@ uniform float white = 0.928;
 
 void main()
 {
-    vec3 color = texture(hdrBuffer, TexCoords).rgb;
+    vec3 color = texture(hdrBuffer, texCoords).rgb;
 
     // Convert to XYZ
     vec3 xyzCol = rgb2xyz * color;

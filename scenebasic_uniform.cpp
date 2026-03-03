@@ -6,40 +6,73 @@
 #include <iostream>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
 using std::cerr;
 using std::endl;
 using glm::mat4;
 using glm::vec3;
 
 SceneBasic_Uniform::SceneBasic_Uniform() {
-    Material toolboxMaterial;
-    toolboxMaterial.ka = vec3(0.15f, 0.5f, 0.5f);
-    toolboxMaterial.ks = vec3(0.1f, 0.1f, 0.1f);
-    toolboxMaterial.shininess = 2.0f;
-    glm::mat4 toolboxTransform = glm::translate(glm::mat4(1.0f), vec3(0.0f, 0.0f, -5.0f)) * glm::scale(glm::mat4(1.0f), vec3(1.0f));
-    meshInstances.push_back(MeshInstance(
-        "./media/models/rusty_toolbox.obj",
-        "./media/textures/toolbox_diffuse.png",
-        "./media/textures/toolbox_normal.png",
-        std::nullopt,
-        toolboxMaterial,
-        toolboxTransform,
-        true));
+    Material naturalMaterial;
+    naturalMaterial.ka = vec3(0.15f, 0.15f, 0.12f);
+    naturalMaterial.ks = vec3(0.05f, 0.05f, 0.05f);
+    naturalMaterial.shininess = 8.0f;
 
-    Material lampMaterial;
-    lampMaterial.ka = vec3(0.15f, 0.5f, 0.5f);
-    lampMaterial.ks = vec3(0.1f, 0.1f, 0.1f);
-    lampMaterial.shininess = 2.0f;
-    glm::mat4 lampTransform = glm::scale(glm::mat4(1.0f), vec3(10.0f));
-    meshInstances.push_back(MeshInstance(
-        "./media/models/lantern.obj",
-        "./media/textures/lantern_diffuse.png",
-        "./media/textures/lantern_normal.png",
-        "./media/textures/lantern_alpha.png",
-        lampMaterial,
-        lampTransform,
-        true));
+
+    {
+        auto t = glm::translate(glm::mat4(1.0f), vec3(-10.0f, 0.0f, -12.0f)) * glm::scale(glm::mat4(1.0f), vec3(3.0f));
+        meshInstances.push_back(MeshInstance("./media/models/CommonTree_1_Bark_NormalTree.obj",
+            "./media/textures/Bark_NormalTree.png", "./media/textures/Bark_NormalTree_Normal.png",
+            std::nullopt, naturalMaterial, t, false));
+        meshInstances.push_back(MeshInstance("./media/models/CommonTree_1_Leaves_NormalTree.obj",
+            "./media/textures/Leaves_NormalTree_C.png", "./media/textures/Bark_NormalTree_Normal.png",
+            std::nullopt, naturalMaterial, t, false));
+    }
+    {
+        auto t = glm::translate(glm::mat4(1.0f), vec3(10.0f, 0.0f, -12.0f)) * glm::scale(glm::mat4(1.0f), vec3(3.0f));
+        meshInstances.push_back(MeshInstance("./media/models/CommonTree_2_Bark_NormalTree.obj",
+            "./media/textures/Bark_NormalTree.png", "./media/textures/Bark_NormalTree_Normal.png",
+            std::nullopt, naturalMaterial, t, false));
+        meshInstances.push_back(MeshInstance("./media/models/CommonTree_2_Leaves_NormalTree.obj",
+            "./media/textures/Leaves_NormalTree_C.png", "./media/textures/Bark_NormalTree_Normal.png",
+            std::nullopt, naturalMaterial, t, false));
+    }
+    {
+        auto t = glm::translate(glm::mat4(1.0f), vec3(-18.0f, 0.0f, -18.0f)) * glm::scale(glm::mat4(1.0f), vec3(3.5f));
+        meshInstances.push_back(MeshInstance("./media/models/CommonTree_3_Bark_NormalTree.obj",
+            "./media/textures/Bark_NormalTree.png", "./media/textures/Bark_NormalTree_Normal.png",
+            std::nullopt, naturalMaterial, t, false));
+        meshInstances.push_back(MeshInstance("./media/models/CommonTree_3_Leaves_NormalTree.obj",
+            "./media/textures/Leaves_NormalTree_C.png", "./media/textures/Bark_NormalTree_Normal.png",
+            std::nullopt, naturalMaterial, t, false));
+    }
+    {
+        auto t = glm::translate(glm::mat4(1.0f), vec3(18.0f, 0.0f, -18.0f)) * glm::scale(glm::mat4(1.0f), vec3(3.5f));
+        meshInstances.push_back(MeshInstance("./media/models/CommonTree_4_Bark_NormalTree.obj",
+            "./media/textures/Bark_NormalTree.png", "./media/textures/Bark_NormalTree_Normal.png",
+            std::nullopt, naturalMaterial, t, false));
+        meshInstances.push_back(MeshInstance("./media/models/CommonTree_4_Leaves_NormalTree.obj",
+            "./media/textures/Leaves_NormalTree_C.png", "./media/textures/Bark_NormalTree_Normal.png",
+            std::nullopt, naturalMaterial, t, false));
+    }
+    {
+        auto t = glm::translate(glm::mat4(1.0f), vec3(-5.0f, 0.0f, -24.0f)) * glm::scale(glm::mat4(1.0f), vec3(3.0f));
+        meshInstances.push_back(MeshInstance("./media/models/Pine_1_Bark_NormalTree.obj",
+            "./media/textures/Bark_NormalTree.png", "./media/textures/Bark_NormalTree_Normal.png",
+            std::nullopt, naturalMaterial, t, false));
+        meshInstances.push_back(MeshInstance("./media/models/Pine_1_Leaves_Pine.obj",
+            "./media/textures/Leaf_Pine_C.png", "./media/textures/Bark_NormalTree_Normal.png",
+            std::nullopt, naturalMaterial, t, false));
+    }
+    {
+        auto t = glm::translate(glm::mat4(1.0f), vec3(5.0f, 0.0f, -26.0f)) * glm::scale(glm::mat4(1.0f), vec3(3.0f));
+        meshInstances.push_back(MeshInstance("./media/models/Pine_2_Bark_NormalTree.obj",
+            "./media/textures/Bark_NormalTree.png", "./media/textures/Bark_NormalTree_Normal.png",
+            std::nullopt, naturalMaterial, t, false));
+        meshInstances.push_back(MeshInstance("./media/models/Pine_2_Leaves_Pine.obj",
+            "./media/textures/Leaf_Pine_C.png", "./media/textures/Bark_NormalTree_Normal.png",
+            std::nullopt, naturalMaterial, t, false));
+    }
+
 }
 
 void SceneBasic_Uniform::setupFBO() {
@@ -142,19 +175,19 @@ void SceneBasic_Uniform::initScene()
     projection = glm::perspective(glm::radians(90.0f), (float)width / (float)height, 0.1f, 1000.0f);
 
     prog.use();
-    glm::vec4 lightDir = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+    glm::vec4 lightDir = glm::vec4(0.6f, 1.0f, 0.4f, 0.0f);
     lightDirection = glm::normalize(glm::vec3(view * lightDir));
     prog.setUniform("light.direction", lightDirection);
-    prog.setUniform("light.la", vec3(0.05f)); // Ambient
-    prog.setUniform("light.ld", vec3(0.1f)); // Diffuse
+    prog.setUniform("light.la", vec3(0.2f, 0.18f, 0.15f));
+    prog.setUniform("light.ld", vec3(0.85f, 0.75f, 0.6f));
 
-    prog.setUniform("spotlight.l", vec3(4.0f)); // Spotlight intensity
+    prog.setUniform("spotlight.l", vec3(2.5f, 2.0f, 1.5f));
     prog.setUniform("spotlight.exponent", 20.0f);
     prog.setUniform("spotlight.cutoff", glm::radians(50.0f));
 
-    prog.setUniform("fog.maxDist", 80.0f);
-    prog.setUniform("fog.minDist", 25.0f);
-    prog.setUniform("fog.color", vec3(0.5f));
+    prog.setUniform("fog.maxDist", 120.0f);
+    prog.setUniform("fog.minDist", 30.0f);
+    prog.setUniform("fog.color", vec3(0.6f, 0.75f, 0.8f));
 
     // Setup Gaussian blur weights
     float weights[5], sum, sigma2 = 8.0f;
@@ -229,6 +262,7 @@ void SceneBasic_Uniform::renderScene()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     prog.use();
+
     // AI USAGE: refer to ./ai_transcript/vector_looping
     for (auto& meshInstance : meshInstances) {
         meshInstance.render(prog, view, projection);
@@ -295,7 +329,7 @@ void SceneBasic_Uniform::tonemap()
 
     toneMapProg.use();
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, blurTexture2);
+    glBindTexture(GL_TEXTURE_2D, hdrColorTexture);
     toneMapProg.setUniform("hdrBuffer", 0);
     toneMapProg.setUniform("logAverageLum", logAverageLuminance);
 
@@ -315,8 +349,8 @@ void SceneBasic_Uniform::render()
 {
     renderScene();
     computeLogAverageLuminance();
-    blurVertical();
-    blurHorizontal();
+    //blurVertical();
+    //blurHorizontal();
     tonemap();
 }
 

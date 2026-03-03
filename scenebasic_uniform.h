@@ -20,7 +20,6 @@ private:
     SkyboxInstance skybox;
     FlyCamera camera;
 
-
     // HDR
     GLSLProgram toneMapProg;
     GLuint hdrFBO;
