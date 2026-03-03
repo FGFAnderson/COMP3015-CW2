@@ -4,6 +4,8 @@ Plymouth University COMP3015 Games Graphics Pipelines (25/SP/SB/M)
 
 ## YouTube Demo
 
+[https://youtu.be/wuI9aAfJ708]
+
 ## How It Works
 
 Simply an OpenGL scene of a forest rendered with Blinn-Phong lighting. The scene renders into an HDR framebuffer, then a fullscreen tone mapping pass resolves it to LDR with gamma correction.
