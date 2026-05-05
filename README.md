@@ -14,7 +14,7 @@ Plymouth University COMP3015 Games Graphics Pipelines (25/SP/SB/M)
 ## Videos & Repo
 
 - [CW1 Demo](https://youtu.be/wuI9aAfJ708)
-- CW2 video: *[link to be added]*
+- [CW2 Video](https://youtu.be/T5bjJyn9lh4)
 - GitHub: [FGFAnderson/COMP3015-CW2](https://github.com/FGFAnderson/COMP3015-CW2)
 
 ## Building and Running
