@@ -17,6 +17,12 @@ Plymouth University COMP3015 Games Graphics Pipelines (25/SP/SB/M)
 - [CW2 Video](https://youtu.be/T5bjJyn9lh4)
 - GitHub: [FGFAnderson/COMP3015-CW2](https://github.com/FGFAnderson/COMP3015-CW2)
 
+## Dependencies
+
+Libraries expected at `C:\Users\Public\OpenGL\`: GLFW3, GLM, Assimp, Bullet Physics.
+
+GLAD and ImGui are vendored in the repo.
+
 ## Building and Running
 
 ```sh
