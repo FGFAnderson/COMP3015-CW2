@@ -192,7 +192,7 @@ void GLSLProgram::link() {
 		findUniformLocations();
 		linked = true;
 	}
-	 
+
 	detachAndDeleteShaderObjects();
 
 	if( GL_FALSE == status ) throw GLSLProgramException(errString);

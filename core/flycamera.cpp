@@ -5,9 +5,9 @@
 // The following class is based off: https://learnopengl.com/Getting-started/Camera
 FlyCamera::FlyCamera(glm::vec3 startPos, float moveSpeed, float mouseSensitivity)
     : position(startPos), forward(0.0f, 0.0f, -1.0f), right(1.0f, 0.0f, 0.0f), up(0.0f, 1.0f, 0.0f),
-      speed(moveSpeed), sensitivity(mouseSensitivity),
-      lastX(0.0f), lastY(0.0f),
-      yaw(-90.0f), pitch(0.0f)
+    speed(moveSpeed), sensitivity(mouseSensitivity),
+    lastX(0.0f), lastY(0.0f),
+    yaw(-90.0f), pitch(0.0f)
 {
     updateVectors();
 }

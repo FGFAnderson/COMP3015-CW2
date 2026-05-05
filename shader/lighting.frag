@@ -3,8 +3,6 @@
 in vec3 position;
 in vec2 texCoord;
 in vec3 normal;
-in vec3 tangent;
-in vec3 bitangent;
 layout(location = 0) out vec4 fragColor;
 
 struct Light {
@@ -19,45 +17,15 @@ struct Material {
     float shininess;
 };
 
-// Lecture 3: https://dle.plymouth.ac.uk/pluginfile.php/3763254/mod_resource/content/1/Lecture3%20-%20Lighting%20and%20shading.pdf
-// https://learnopengl.com/Lighting/Light-casters
-struct Spotlight {
-    vec3 position; // Position in cam coords
-    vec3 l; // Diffuse/spec intensity
-    vec3 direction; // direction of the spotlight in cam coords.
-    float exponent; // Angular attenuation exponent
-    float cutoff; // cutoff angle (between 0 and pi/2)
-};
-
-struct Fog {
-    float maxDist;
-    float minDist;
-    vec3 color;
-};
+#define MAX_POINT_LIGHTS 64
 
 uniform Light light;
 uniform Material material;
 uniform sampler2D tex;
-uniform sampler2D alphaTex;
-uniform bool hasAlphaMap;
-uniform Spotlight spotlight;
-uniform Fog fog;
-uniform sampler2D normalMap;
-uniform bool hasNormalMap;
-uniform bool alphaTest;
-
-// Lecture 3: https://dle.plymouth.ac.uk/pluginfile.php/3763254/mod_resource/content/1/Lecture3%20-%20Lighting%20and%20shading.pdf
-vec3 fogModel(vec3 position, vec3 color) {
-    float distance = abs(position.z);
-
-    float fogFactor = (fog.maxDist - distance) / (fog.maxDist - fog.minDist);
-
-    fogFactor = clamp(fogFactor, 0.0, 1.0);
-
-    vec3 fogColor = mix(fog.color, color, fogFactor);
-
-    return fogColor;
-}
+uniform vec3 matColor;
+uniform vec3 pointLightPos[MAX_POINT_LIGHTS];
+uniform vec3 pointLightCol[MAX_POINT_LIGHTS];
+uniform int numPointLights;
 
 // https://learnopengl.com/Lighting/Basic-Lighting
 vec3 blinnPhongModel(vec3 position, vec3 normal, vec3 texColor)
@@ -67,11 +35,8 @@ vec3 blinnPhongModel(vec3 position, vec3 normal, vec3 texColor)
     vec3 viewDir = normalize(-position);
     vec3 halfDir = normalize(viewDir + lightDir);
 
-    // Ambient component
-    vec3 ambient = material.ka * light.la;
-
-    // Diffuse component
-    vec3 diffuse = texColor * light.ld * max(0.0, dot(norm, lightDir));
+    vec3 ambient = material.ka * light.la * texColor;
+    vec3 diffuse = texColor * light.ld * abs(dot(norm, lightDir));
 
     // Specular component
     vec3 specular = material.ks * light.ld * pow(max(0.0, dot(norm, halfDir)), material.shininess);
@@ -79,64 +44,31 @@ vec3 blinnPhongModel(vec3 position, vec3 normal, vec3 texColor)
     return ambient + diffuse + specular;
 }
 
-// https://learnopengl.com/Lighting/Light-casters
-vec3 spotBlinnPhong(vec3 position, vec3 normal, vec3 texColor) {
-    vec3 norm = normalize(normal);
+vec3 pointLightsContrib(vec3 pos, vec3 norm, vec3 texColor)
+{
+    vec3 result = vec3(0.0);
+    for (int i = 0; i < min(numPointLights, MAX_POINT_LIGHTS); i++) {
+        vec3 toLight = pointLightPos[i] - pos;
+        float dist = length(toLight);
+        vec3 lightDir = toLight / dist;
 
-    vec3 spotDir = normalize(spotlight.position - position);
-    float cosAng = dot(-spotDir, spotlight.direction);
-    float angle = acos(cosAng);
-    float spotScale = 0.0;
-    vec3 diffuse = vec3(0.0);
-    vec3 specular = vec3(0.0);
+        // Quadratic attenuation - https://developer.valvesoftware.com/wiki/Constant-Linear-Quadratic_Falloff
+        float atten = 1.0 / (1.0 + 0.1 * dist + 0.15 * dist * dist);
 
-    if (angle < spotlight.cutoff) {
-        spotScale = pow(cosAng, spotlight.exponent);
-        float dotProduct = dot(spotDir, norm);
-        diffuse = texColor * max(0.0, dotProduct);
-
-        if (dotProduct > 0.0) {
-            vec3 viewDir = normalize(-position);
-            vec3 halfDir = normalize(viewDir + spotDir);
-            specular = material.ks * pow(max(0.0, dot(norm, halfDir)), material.shininess);
-        }
+        float diff = max(dot(norm, lightDir), 0.0);
+        result += texColor * pointLightCol[i] * diff * atten;
     }
-
-    return spotScale * spotlight.l * (diffuse + specular);
-}
-
-// AI USAGE, AI was used to summarise and explain questions on normal mapping. Refer to : ./ai_transcript/normal_map_explanation.md
-vec3 sampleNormalMap(vec2 texCoord) {
-    if (!hasNormalMap)
-        return normalize(normal);
-
-    // Convert normal map to -1,1 a range
-    vec3 sampledNormal = texture(normalMap, texCoord).rgb * 2.0 - 1.0;
-
-    mat3 TBN = mat3(normalize(tangent), normalize(bitangent), normalize(normal));
-
-    return normalize(TBN * sampledNormal);
+    return result;
 }
 
 void main()
 {
     vec4 texSample = texture(tex, texCoord);
-    vec3 texColor = texSample.rgb;
+    vec3 texColor = texSample.rgb * matColor;
+    float alpha = texSample.a;
 
-    float alpha = hasAlphaMap ? texture(alphaTex, texCoord).r : texSample.a;
-
-    if (alphaTest && alpha < 0.1)
-        discard;
-
-    vec3 normalDirection = sampleNormalMap(texCoord);
-
-    // Handle back-facing surfaces
-    if (!gl_FrontFacing)
-        normalDirection = -normalDirection;
-
-    vec3 directLight = blinnPhongModel(position, normalDirection, texColor);
-    vec3 spotLight = spotBlinnPhong(position, normalDirection, texColor);
-    vec3 lightColor = directLight + spotLight;
-    vec3 fogColor = fogModel(position, lightColor);
-    fragColor = vec4(fogColor, alpha);
+    vec3 norm = normalize(normal);
+    vec3 lightColor = blinnPhongModel(position, norm, texColor) +
+            pointLightsContrib(position, norm, texColor);
+    fragColor = vec4(lightColor, alpha);
 }

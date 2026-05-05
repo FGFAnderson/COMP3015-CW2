@@ -1,4 +1,1 @@
-cd build
-make
-cd ..
-./build/comp3015
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug && ninja -C build && ./build/comp3015
