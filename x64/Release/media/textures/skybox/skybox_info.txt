@@ -1,0 +1,2 @@
+source: https://space-spheremaps.itch.io/space-spheremaps
+converted to a cubemap using: https://equirectangular-cubemap.vercel.app/

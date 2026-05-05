@@ -4,6 +4,8 @@ project(COMP3015)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
+
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
@@ -53,11 +55,19 @@ target_include_directories(comp3015 PRIVATE
 )
 
 target_link_libraries(comp3015 PRIVATE
-    OpenGL::OpenGL
+    OpenGL::GL
     glfw
     glm::glm
-    assimp
+    assimp::assimp
     ${BULLET_LIBRARIES}
 )
 
-target_compile_options(comp3015 PRIVATE -Wall -Wextra -Wpedantic)
+set_target_properties(comp3015 PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+)
+
+if(MSVC)
+    target_compile_options(comp3015 PRIVATE /W3 /utf-8 /EHsc)
+else()
+    target_compile_options(comp3015 PRIVATE -Wall -Wextra -Wpedantic)
+endif()
