@@ -22,7 +22,7 @@ void main()
     float age = currentTime - birthTime;
     float t = age / maxLife;
 
-    // P(t) = P0 + v0*t + 0.5*a*t^2 - https://developer.valvesoftware.com/wiki/Constant-Linear-Quadratic_Falloff
+    // P(t) = P0 + v0*t + 0.5*a*t^2
     vec3 gravity = vec3(0.0, -9.8, 0.0);
     vec3 worldPos = spawnPos + initVel * age + 0.5 * gravity * age * age + meshPos * 0.3;
 

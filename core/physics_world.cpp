@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <string>
 
-static constexpr float CAPSULE_RADIUS = 1.5f;
+static constexpr float CAPSULE_RADIUS = 3.0f;
 static constexpr float CAPSULE_HEIGHT = 12.0f;
 static constexpr float GRAVITY = 20.0f;
 static constexpr float STEP_HEIGHT = 3.0f;
